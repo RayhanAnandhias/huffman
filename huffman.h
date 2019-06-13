@@ -26,4 +26,6 @@ char* characterSet(char* text);
 address newNode (char data, unsigned int frequency);
 addressCollection createCollection(unsigned int capacity);
 unsigned int frequency(char* text, char key);
+void findNode(address root,char find);
+void GenerateCode(address root,char alph);
 #endif
