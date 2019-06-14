@@ -6,6 +6,7 @@ typedef address address1;
 typedef struct node { 
 	address1 data;
 	struct node* next;
+	struct node* prev;
 }STACK;
 
 /*Konstruktor=================================================*/

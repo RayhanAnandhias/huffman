@@ -1,6 +1,6 @@
 #include "huffman.h"
 #include "stacklink.h"
-#include "stackint.h"
+#include "queuelink.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -190,35 +190,38 @@ void huffman(char* text) {
 	root = buildHuffmanTree(text);
 	printHuffmanTree(root, root);
 	printf("\n");
-	findNode(root,'K');//	GenerateCode(root,'I');
+	findNode(root,' ');//	GenerateCode(root,'I');
 }
 
-void findNode(address root,char find){
+int findNode(address root,char find){
 	STACK *s=InitStack();
-	STACKInt *code=InitStackInt();
+	QUEUE code;
+	MakeQueue(&code);
 	address current=root;
 	while(current!=NULL){
 		if(current->data==find){
 			printf("Kode dari %c :",current->data);
-			
-			PrintStackInt(code);
+			Display(code);
+			return 0;
 		}
 		if(current->left!=NULL){
 			if(current->right!=NULL){
 			PushStack(&s,current->right);
 			}
-			PushStackInt(&code,0);
+			Insert(&code,0);
 			current=current->left;
 		}else {
 			if(current->right!=NULL){
 				current=current->right;
 			}else {
 				current=PopStack(&s);
-				if(code->data==0){
-					PopStackInt(&code);
-					PushStackInt(&code,1);	
+				if(getRear(code)==0){
+					setRear(&code,1);	
 				}else{
-					PopStackInt(&code);
+					while(getRear(code)!=0){
+						DeleteRear(&code);	
+					}
+					setRear(&code,1);
 				}
 			}
 		} 
