@@ -85,8 +85,14 @@ void sortCollection(addressCollection collection) {
 	if (collection->size != 0) {
 		for(i = 0; i < collection->size - 1; i++) {
 			for(j = 0; j < collection->size - i - 1; j++) {
-				if (collection->arr[j]->freq >= collection->arr[j+1]->freq) {
-					swap(&collection->arr[j], &collection->arr[j+1]);
+				if (collection->arr[j+1]->data != '*') {
+					if (collection->arr[j]->freq > collection->arr[j+1]->freq) {
+						swap(&collection->arr[j], &collection->arr[j+1]);
+					}	
+				} else {
+					if (collection->arr[j]->freq >= collection->arr[j+1]->freq) {
+						swap(&collection->arr[j], &collection->arr[j+1]);
+					}
 				}
 			}
 		}
@@ -190,7 +196,8 @@ void huffman(char* text) {
 	root = buildHuffmanTree(text);
 	printHuffmanTree(root, root);
 	printf("\n");
-	findNode(root,' ');//	GenerateCode(root,'I');
+	//findNode(root,'T');//	GenerateCode(root,'I');
+	encode(root, text);
 }
 
 int findNode(address root,char find){
@@ -200,7 +207,7 @@ int findNode(address root,char find){
 	address current=root;
 	while(current!=NULL){
 		if(current->data==find){
-			printf("Kode dari %c :",current->data);
+			//printf("Kode dari %c : ",current->data);
 			Display(code);
 			return 0;
 		}
@@ -228,6 +235,13 @@ int findNode(address root,char find){
 	}
 }
 
-
-
-
+void encode(address root, char* text) {
+	char* origin_text = text;
+	int i;
+	//char* set = characterSet(text);
+	printf("Teks Asli : %s\n", origin_text);
+	printf("Encoded\t  : ");
+	for (i = 0; i <= strlen(text) - 1; i++) {
+		findNode(root, text[i]);
+	}
+}
