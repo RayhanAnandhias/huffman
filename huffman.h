@@ -26,7 +26,11 @@ char* characterSet(char* text);
 address newNode (char data, unsigned int frequency);
 addressCollection createCollection(unsigned int capacity);
 unsigned int frequency(char* text, char key);
-int findNode(address root,char find);
+char* findNode(address root,char find);
 void GenerateCode(address root,char alph);
 void encode(address root, char* text);
+int StringToInt(char* binString);
+int binaryToDecimal(int i);
+void ShowCompressedText(char* binaryString);
+void detail(address root, char* text);
 #endif

@@ -23,7 +23,7 @@ void Insert(QUEUE *Q,int aData);
 void DeleteFront(QUEUE *Q);
 void DeleteRear(QUEUE *Q);
 bool IsEmptyQue (QUEUE *Q);
-void Display(QUEUE Q);
+char* Display(QUEUE Q);
 int getRear(QUEUE Q);
 #endif
 

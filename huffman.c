@@ -197,19 +197,22 @@ void huffman(char* text) {
 	printHuffmanTree(root, root);
 	printf("\n");
 	//findNode(root,'T');//	GenerateCode(root,'I');
+	detail(root, text);
 	encode(root, text);
+	printf("\n\n");
 }
 
-int findNode(address root,char find){
+char* findNode(address root,char find){
+	char* binary = malloc(sizeof(char) * 512);
 	STACK *s=InitStack();
 	QUEUE code;
 	MakeQueue(&code);
 	address current=root;
-	while(current!=NULL){
-		if(current->data==find){
+	while(current!=NULL) {
+		if(current->data==find) {
 			//printf("Kode dari %c : ",current->data);
-			Display(code);
-			return 0;
+			binary = Display(code);
+			return binary;
 		}
 		if(current->left!=NULL){
 			if(current->right!=NULL){
@@ -237,11 +240,89 @@ int findNode(address root,char find){
 
 void encode(address root, char* text) {
 	char* origin_text = text;
+	char* binaryString = malloc(sizeof(char) * 512);
+	char* bitWord;
 	int i;
+	
+	strcpy(binaryString, "");
 	//char* set = characterSet(text);
-	printf("Teks Asli : %s\n", origin_text);
-	printf("Encoded\t  : ");
-	for (i = 0; i <= strlen(text) - 1; i++) {
-		findNode(root, text[i]);
+	printf("\nOriginal Text\t: %s\n", origin_text);
+	printf("Encoded\t\t: ");
+	for (i = 0; i <= strlen(origin_text) - 1; i++) {
+		binaryString = strcat(binaryString, findNode(root, text[i]));
 	}
+	printf("%s", binaryString);
+	printf("\n");
+	printf("Compressed Text\t: ");
+	ShowCompressedText(binaryString);
+}
+
+void detail(address root, char* text) {
+	char* charset;
+	unsigned int size;
+    addressCollection collection;
+    char* binaryString = malloc(sizeof(char) * 512);
+    int i, codeLength;
+	charset = characterSet(text);
+	size = strlen(charset);
+	collection = createNodeCollection(text, size, charset);
+	strcpy(binaryString, "");
+	codeLength = 0;
+	printf("                          Huffman Table\n==================================================================\n");
+	printf("\t||\t       ||     Binary     ||   Bit   ||   Code   ||");
+	printf("\n Symbol\t||  Frequency  ||      Code      ||  Length ||  Length  ||\n");
+    printf("%s\n","==================================================================");
+    for(i = 0; i <= size - 1; i++) {
+    	printf("   %c", collection->arr[i]->data);
+	    printf("\t\t%d", collection->arr[i]->freq);
+		binaryString = findNode(root, collection->arr[i]->data);
+		printf("\t       %5s", binaryString);
+		printf("\t       %d", strlen(binaryString));
+		codeLength = collection->arr[i]->freq * strlen(binaryString);
+		printf("\t   %2d\n", codeLength);	
+    	printf("------------------------------------------------------------------\n");	
+	}
+}
+
+void ShowCompressedText(char* binaryString) {
+	int i,j,k,q;
+	int bit;
+	int decimal = 0;
+	char* result = malloc(sizeof(char)*8);
+	char* compressedText = malloc(sizeof(char)*512);
+	strcpy(compressedText, "");
+	k=0;
+	q = 0;
+	for (i = 0; i <= strlen(binaryString) - 1; i++) {
+		for (j = 0; j <= 7; j++) {
+			result[j] = binaryString[k];
+			k++;
+		}
+		decimal = binaryToDecimal(StringToInt(result));
+		printf("%c", decimal);
+		i = k - 1;
+	}
+}
+
+int binaryToDecimal(int i) {
+	int  num, binary_val, decimal_val = 0, base = 1, rem;
+ 	
+ 	num = i;
+    binary_val = num;
+    while (num > 0)
+    {
+        rem = num % 10;
+        decimal_val = decimal_val + rem * base;
+        num = num / 10 ;
+        base = base * 2;
+    }
+    //printf("The Binary number is = %d \n", binary_val);
+    //printf("Its decimal equivalent is = %d \n", decimal_val);
+    return decimal_val;
+}
+
+int StringToInt(char* binString) {
+	int i;
+	sscanf(binString, "%d", &i);
+	return i;
 }

@@ -50,16 +50,21 @@ bool IsEmptyQue (QUEUE *Q){
 	return ((*Q).front==NULL);
 }
 
-void Display(QUEUE Q){
-	if(Q.front!=NULL){
+char* Display(QUEUE Q) {
+	int i = 0;
+	int index = 0;
+	char* strbit = malloc(sizeof(char)*128);
+	if(Q.front!=NULL) {
 		element *temp=Q.front;
-
-		while(temp!=NULL){
-			printf("%i",temp->data);
+		while(temp!=NULL) {
+			//printf("%i",temp->data);
+			index += sprintf(&strbit[index], "%d", temp->data);
 			temp = temp->next;
 		}
+		return strbit;
 	}else {
-		printf("its empty");
+		printf("1");
+		return "1";
 	}
 }
 
