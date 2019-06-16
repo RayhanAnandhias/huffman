@@ -99,8 +99,7 @@ void sortCollection(addressCollection collection) {
 	}
 }
 
-addressCollection createNodeCollection(char* text, unsigned int size, 
-										char* data) {
+addressCollection createNodeCollection(char* text, unsigned int size, char* data) {
 	int i;
 	addressCollection collection = createCollection(size);
 	
@@ -137,42 +136,49 @@ void insertToCollection(address internalNode, addressCollection collection) {
 	sortCollection(collection);
 }
 
-int getLevelOfNode (address root, char data, unsigned int keyfreq, int level) {
+int getLevelOfNode (address root, char data, unsigned int keyfreq, int level, address currentAddress) {
 	address current = root;
 	if (current == NULL)
 		return -1;
-	if (current->data == data && current->freq == keyfreq)
+	if (current->data == data && current->freq == keyfreq && current == currentAddress)
 		return level;
-	int result = getLevelOfNode (current->left, data, keyfreq, level+1);
+	int result = getLevelOfNode (current->left, data, keyfreq, level+1, currentAddress);
 	if (result != -1) {
 		return result;
 	}
-	result = getLevelOfNode(current->right, data, keyfreq, level+1);
+	result = getLevelOfNode(current->right, data, keyfreq, level+1, currentAddress);
 	return result;
 }
 
-int getLevel (address Troot, char data, unsigned int keyfreq) {
-	return getLevelOfNode(Troot, data, keyfreq, 0);
+int getLevel (address Troot, char data, unsigned int keyfreq, address currentAddress) {
+	return getLevelOfNode(Troot, data, keyfreq, 0, currentAddress);
 }
 
-void printHuffmanTree(address Troot, address root) {
+void HuffmanTree(address Troot, address root) {
 	int i;
+	int level;
 	address current = root;
 	if (current != NULL) {
-		for (i = 0;i <= getLevel(Troot, current->data, current->freq); i++) {  
+		level = getLevel(Troot, current->data, current->freq, current);
+		for (i = 0;i <= level; i++) {  
 			printf("   ");
 		}
 		printf("%c(%d)\n", current->data, current->freq);
-		printHuffmanTree(Troot, current->left);
-		printHuffmanTree(Troot, current->right);
+		HuffmanTree(Troot, current->left);
+		HuffmanTree(Troot, current->right);
 	}
 }
 
-//beta module
+void printHuffmanTree(address TreeRoot, address node) {
+	printf("\t\tHUFFMAN TREE\n");
+	printf("============================================\n");
+	HuffmanTree(TreeRoot, node);
+}
+
 address buildHuffmanTree(char* text) {
 	char* charset;
 	unsigned size;
-	address left, right,top;
+	address left, right,top,temp;
 	addressCollection collection;
 	
 	charset = characterSet(text);
@@ -182,6 +188,11 @@ address buildHuffmanTree(char* text) {
 	while (!isCollectionSizeOne(collection)) {
 		left = getMinFreqNode(collection);
 		right = getMinFreqNode(collection);
+		if(left->data == '*' && right->data != '*' && left->freq == right->freq) {
+			temp = left;
+			left = right;
+			right = temp;
+		}
 		top = newNode('*', left->freq + right->freq);
 		top->left = left;
 		top->right = right;
@@ -192,17 +203,12 @@ address buildHuffmanTree(char* text) {
 
 void huffman(char* text) {
 	address root;
-	
 	root = buildHuffmanTree(text);
 	printHuffmanTree(root, root);
-	printf("\n");
-	//findNode(root,'T');//	GenerateCode(root,'I');
-	detail(root, text);
 	encode(root, text);
-	printf("\n\n");
 }
 
-char* findNode(address root,char find){
+char* findNode(address root,char find) {
 	char* binary = malloc(sizeof(char) * 512);
 	STACK *s=InitStack();
 	QUEUE code;
@@ -210,7 +216,6 @@ char* findNode(address root,char find){
 	address current=root;
 	while(current!=NULL) {
 		if(current->data==find) {
-			//printf("Kode dari %c : ",current->data);
 			binary = Display(code);
 			return binary;
 		}
@@ -239,22 +244,8 @@ char* findNode(address root,char find){
 }
 
 void encode(address root, char* text) {
-	char* origin_text = text;
-	char* binaryString = malloc(sizeof(char) * 512);
-	char* bitWord;
-	int i;
-	
-	strcpy(binaryString, "");
-	//char* set = characterSet(text);
-	printf("\nOriginal Text\t: %s\n", origin_text);
-	printf("Encoded\t\t: ");
-	for (i = 0; i <= strlen(origin_text) - 1; i++) {
-		binaryString = strcat(binaryString, findNode(root, text[i]));
-	}
-	printf("%s", binaryString);
 	printf("\n");
-	printf("Compressed Text\t: ");
-	ShowCompressedText(binaryString);
+	detail(root, text);
 }
 
 void detail(address root, char* text) {
@@ -262,12 +253,32 @@ void detail(address root, char* text) {
 	unsigned int size;
     addressCollection collection;
     char* binaryString = malloc(sizeof(char) * 512);
-    int i, codeLength;
+    int i, codeLength, sum;
+    
 	charset = characterSet(text);
 	size = strlen(charset);
 	collection = createNodeCollection(text, size, charset);
 	strcpy(binaryString, "");
-	codeLength = 0;
+	codeLength = sum = 0;
+	huffmanTable(root, collection, binaryString, &sum, size);
+	printf("\nText Encoded With Total Code Length %d", sum);
+	printf("\nOriginal Text\t\t: %s\n", text);
+	printf("Encoded\t\t\t: ");
+	for (i = 0; i <= strlen(text) - 1; i++) {
+		binaryString = strcat(binaryString, findNode(root, text[i]));
+	}
+	printf("%s\n", binaryString);
+	printf("Compressed Text\t\t: ");
+	ShowCompressedText(binaryString);
+	printf("\nOriginal Text Size\t: %5d byte", strlen(text));
+	printf("\nCompressed Text Size\t: %.2f byte", (float)sum / 8);
+	printf("\nCompression Rate\t: %.2f %%", (float)(((float)strlen(text) - (float)(sum/8))/(float)strlen(text))*(float)100);
+}
+
+void huffmanTable(address root, addressCollection collection, char* binaryString, int *sum, int size) {
+	int i = 0;
+	int codeLength = 0;
+	printf("\n==================================================================\n");
 	printf("                          Huffman Table\n==================================================================\n");
 	printf("\t||\t       ||     Binary     ||   Bit   ||   Code   ||");
 	printf("\n Symbol\t||  Frequency  ||      Code      ||  Length ||  Length  ||\n");
@@ -279,7 +290,8 @@ void detail(address root, char* text) {
 		printf("\t       %5s", binaryString);
 		printf("\t       %d", strlen(binaryString));
 		codeLength = collection->arr[i]->freq * strlen(binaryString);
-		printf("\t   %2d\n", codeLength);	
+		printf("\t   %2d\n", codeLength);
+		*sum += codeLength;	
     	printf("------------------------------------------------------------------\n");	
 	}
 }
@@ -316,8 +328,6 @@ int binaryToDecimal(int i) {
         num = num / 10 ;
         base = base * 2;
     }
-    //printf("The Binary number is = %d \n", binary_val);
-    //printf("Its decimal equivalent is = %d \n", decimal_val);
     return decimal_val;
 }
 

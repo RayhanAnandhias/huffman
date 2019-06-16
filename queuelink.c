@@ -63,7 +63,7 @@ char* Display(QUEUE Q) {
 		}
 		return strbit;
 	}else {
-		printf("1");
+		//printf("1");
 		return "1";
 	}
 }
