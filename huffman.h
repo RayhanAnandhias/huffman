@@ -42,7 +42,7 @@ int StringToInt(char* binString);
 int binaryToDecimal(int i);
 void ShowCompressedText(char* binaryString);
 void detail(address root, char* text);
-void huffmanTable(address root, addressCollection collection, char* binaryString, int *sum, int size);
+void huffmanTable(address root, addressCollection collection, char* binaryString, int *sum, int size, float *avg);
 void HuffmanTree(address Troot, address root);
 void printHuffmanTree(address TreeRoot, address node);
 address buildHuffmanTree(char* text);

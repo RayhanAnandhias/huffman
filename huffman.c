@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 
 address newNode (char data, unsigned int frequency) {
 	address nNew = (address) malloc(sizeof(node));
@@ -254,15 +255,17 @@ void detail(address root, char* text) {
     addressCollection collection;
     char* binaryString = malloc(sizeof(char) * 512);
     int i, codeLength, sum;
+    float avgCLength = 0;
     
 	charset = characterSet(text);
 	size = strlen(charset);
 	collection = createNodeCollection(text, size, charset);
 	strcpy(binaryString, "");
 	codeLength = sum = 0;
-	huffmanTable(root, collection, binaryString, &sum, size);
+	huffmanTable(root, collection, binaryString, &sum, size, &avgCLength);
 	printf("\nText Encoded With Total Code Length %d", sum);
-	printf("\nOriginal Text\t\t: %s\n", text);
+	printf("\nAverage Code Length\t: %.2f\n", avgCLength);
+	printf("Original Text\t\t: %s\n", text);
 	printf("Encoded\t\t\t: ");
 	for (i = 0; i <= strlen(text) - 1; i++) {
 		binaryString = strcat(binaryString, findNode(root, text[i]));
@@ -270,14 +273,15 @@ void detail(address root, char* text) {
 	printf("%s\n", binaryString);
 	printf("Compressed Text\t\t: ");
 	ShowCompressedText(binaryString);
-	printf("\nOriginal Text Size\t: %5d byte", strlen(text));
-	printf("\nCompressed Text Size\t: %.2f byte", (float)sum / 8);
-	printf("\nCompression Rate\t: %.2f %%", (float)(((float)strlen(text) - (float)(sum/8))/(float)strlen(text))*(float)100);
+	printf("\nOriginal Text Size\t: %2d byte", strlen(text));
+	printf("\nCompressed Text Size\t: %.f  byte", ceil((float)sum / 8));
+	printf("\nCompression Rate\t: %.2f %%", (float)(((float)strlen(text) - ceil((float)sum / 8))/(float)strlen(text))*(float)100);
 }
 
-void huffmanTable(address root, addressCollection collection, char* binaryString, int *sum, int size) {
+void huffmanTable(address root, addressCollection collection, char* binaryString, int *sum, int size, float *avg) {
 	int i = 0;
 	int codeLength = 0;
+	int sumFreq = 0;
 	printf("\n==================================================================\n");
 	printf("                          Huffman Table\n==================================================================\n");
 	printf("\t||\t       ||     Binary     ||   Bit   ||   Code   ||");
@@ -291,9 +295,11 @@ void huffmanTable(address root, addressCollection collection, char* binaryString
 		printf("\t       %d", strlen(binaryString));
 		codeLength = collection->arr[i]->freq * strlen(binaryString);
 		printf("\t   %2d\n", codeLength);
+		sumFreq += collection->arr[i]->freq;
 		*sum += codeLength;	
     	printf("------------------------------------------------------------------\n");	
 	}
+	*avg = (float)*sum/(float)sumFreq;
 }
 
 void ShowCompressedText(char* binaryString) {
@@ -311,7 +317,11 @@ void ShowCompressedText(char* binaryString) {
 			k++;
 		}
 		decimal = binaryToDecimal(StringToInt(result));
-		printf("%c", decimal);
+		if (decimal == 10 || decimal == 13) {
+			printf(" ");	
+		} else {
+			printf("%c", decimal);	
+		}
 		i = k - 1;
 	}
 }
