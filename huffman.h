@@ -1,3 +1,11 @@
+/* Program		: HuffmanImplementation
+ * Deskripsi	: Membuat Program Implementasi Huffman Code
+ * Nama			: M. Naufal Fadhil (181524016)
+ 				  Rayhan Azka Anandhias Putra (181524028)
+ * Tanggal/versi: 23-06-2019/ v1.0.0
+ * Compiler		: TDM-GCC 4.9.2 64-bit
+ */
+//=================================================================================================
 #ifndef HUFFMAN_H
 #define HUFFMAN_H
 #include <stdbool.h>
@@ -20,6 +28,11 @@ struct nodeCollection {
 	unsigned int capacity;
 	arrayOfNode arr;
 };
+
+typedef struct {
+	char* charsaved;
+	unsigned* freqsaved;
+}SavedString;
 
 void huffman(char* text);
 char* characterSet(char* text);
@@ -47,6 +60,9 @@ void HuffmanTree(address Troot, address root);
 void printHuffmanTree(address TreeRoot, address node);
 address buildHuffmanTree(char* text);
 int StringToInt(char* binString);
-void menu(address root,char *text);
+void menu(address root,char* text);
+void startProgramText();
 void startProgram();
+addressCollection startWordFreq();
+SavedString saved;
 #endif

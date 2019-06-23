@@ -1,3 +1,11 @@
+/* Program		: HuffmanImplementation
+ * Deskripsi	: Membuat Program Implementasi Huffman Code
+ * Nama			: M. Naufal Fadhil (181524016)
+ 				  Rayhan Azka Anandhias Putra (181524028)
+ * Tanggal/versi: 23-06-2019/ v1.0.0
+ * Compiler		: TDM-GCC 4.9.2 64-bit
+ */
+//=================================================================================================
 #include "huffman.h"
 #include "stacklink.h"
 #include "queuelink.h"
@@ -6,6 +14,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include <math.h>
+
+bool whichMenu;
 
 address newNode (char data, unsigned int frequency) {
 	address nNew = (address) malloc(sizeof(node));
@@ -105,7 +115,11 @@ addressCollection createNodeCollection(char* text, unsigned int size, char* data
 	addressCollection collection = createCollection(size);
 	
 	for(i = 0; i < size; i++)
-		collection->arr[i] = newNode(data[i], frequency(text, data[i]));
+		if (whichMenu == true){
+			collection->arr[i] = newNode(data[i], frequency(text, data[i]));	
+		} else {
+			collection->arr[i] = newNode(saved.charsaved[i], saved.freqsaved[i]);
+		}
 	
 	collection->size = size;
 	sortCollection(collection);	
@@ -178,14 +192,18 @@ void printHuffmanTree(address TreeRoot, address node) {
 
 address buildHuffmanTree(char* text) {
 	char* charset;
+	//char* temps = malloc (sizeof(char)*255);
 	unsigned size;
 	address left, right,top,temp;
 	addressCollection collection;
-	
-	charset = characterSet(text);
-	size = strlen(charset);
-	collection = createNodeCollection(text, size, charset);
-	
+	if (whichMenu != true) {
+		collection = startWordFreq();
+		//strcpy(temps, saved.charsaved);
+	} else {
+		charset = characterSet(text);
+		size = strlen(charset);
+		collection = createNodeCollection(text, size, charset);
+	}
 	while (!isCollectionSizeOne(collection)) {
 		left = getMinFreqNode(collection);
 		right = getMinFreqNode(collection);
@@ -199,14 +217,17 @@ address buildHuffmanTree(char* text) {
 		top->right = right;
 		insertToCollection(top, collection);
 	}
+	//strcpy(saved.charsaved, temps);
 	return getMinFreqNode(collection);
 }
-void startProgram(){
+
+void startProgramText(){
 	char text[MAX_ELMT];
+	system("cls");
 	printf("========Welcome To HuffMan Generator=======");
 	printf("\nThis Is Your First Launch ! Please Insert first text to be generate ");
-	printf("\ninput here (Max 10.000 character): ");
-	scanf("%[^\n]s",text);
+	printf("\ninput here (Max 10.000 character): "); 
+	scanf("%[^\n]s",text); fflush(stdin);
 	huffman(text);
 }
 void huffman(char* text) {
@@ -232,8 +253,10 @@ void menu(address root,char* text){
 		switch(choice){
 			case 1	:
 					printHuffmanTree(root, root);
-					printf("Current Text :");
-					printf("\n%s",text);
+					if (whichMenu == true) {
+						printf("Current Text :");
+						printf("\n%s",text);
+					}
 					break;
 			case 2	:
 					encode(root, text);
@@ -296,26 +319,32 @@ void detail(address root, char* text) {
     char* binaryString = malloc(sizeof(char) * MAX_ELMT);
     int i, codeLength, sum;
     float avgCLength = 0;
-    
-	charset = characterSet(text);
-	size = strlen(charset);
-	collection = createNodeCollection(text, size, charset);
+    if (whichMenu == true) {
+    	charset = characterSet(text);
+		size = strlen(charset);
+		collection = createNodeCollection(text, size, charset);
+	} else {
+		size = strlen(saved.charsaved);
+		collection = createNodeCollection(NULL, size, saved.charsaved);
+	} 
 	strcpy(binaryString, "");
 	codeLength = sum = 0;
 	huffmanTable(root, collection, binaryString, &sum, size, &avgCLength);
 	printf("\nText Encoded With Total Code Length %d", sum);
 	printf("\nAverage Code Length\t: %.2f\n", avgCLength);
-	printf("Original Text\t\t: %s\n", text);
-	printf("Encoded\t\t\t: ");
-	for (i = 0; i <= strlen(text) - 1; i++) {
-		binaryString = strcat(binaryString, findNode(root, text[i]));
-	}
-	printf("%s\n", binaryString);
-	printf("Compressed Text\t\t: ");
-	ShowCompressedText(binaryString);
-	printf("\nOriginal Text Size\t: %2d byte", strlen(text));
-	printf("\nCompressed Text Size\t: %.f  byte", ceil((float)sum / 8));
-	printf("\nCompression Rate\t: %.2f %%", (float)(((float)strlen(text) - ceil((float)sum / 8))/(float)strlen(text))*(float)100);
+	if (whichMenu == true) {
+		printf("Original Text\t\t: %s\n", text);
+		printf("Encoded\t\t\t: ");
+		for (i = 0; i <= strlen(text) - 1; i++) {
+			binaryString = strcat(binaryString, findNode(root, text[i]));
+		}
+		printf("%s\n", binaryString);
+		printf("Compressed Text\t\t: ");
+		ShowCompressedText(binaryString);
+		printf("\nOriginal Text Size\t: %2d byte", strlen(text));
+		printf("\nCompressed Text Size\t: %.f  byte", ceil((float)sum / 8));
+		printf("\nCompression Rate\t: %.2f %%", (float)(((float)strlen(text) - ceil((float)sum / 8))/(float)strlen(text))*(float)100);
+	} 
 }
 
 void huffmanTable(address root, addressCollection collection, char* binaryString, int *sum, int size, float *avg) {
@@ -387,4 +416,66 @@ int StringToInt(char* binString) {
 	return i;
 }
 
+void startProgram() {
+	int choice;
+		printf("========Huffman Generator=======");
+		printf("\n1.Enter Text To Generate");
+		printf("\n2.Enter Symbol and Frequency");
+		printf("\n0.exit");
+		printf("\n Input Choice : ");
+		scanf("%d", &choice); fflush(stdin);
+		switch (choice) {
+			case 1 :
+				whichMenu = true;
+				startProgramText();
+				break;
+			case 2 :
+				whichMenu = false;
+				address root;
+				root = buildHuffmanTree(NULL);
+				menu(root, NULL);
+				break;
+			case 0 :
+				//exit=true;
+				printf("Exiting Program...\n");
+				break;
+			default :
+				printf("invalid input\n");
+				break;
+		}
+	
+}
 
+addressCollection startWordFreq() {
+	whichMenu = false;
+	saved.charsaved = malloc(sizeof(char)*255);
+	saved.freqsaved = malloc(sizeof(unsigned)*255);
+	char charset[CHAR_SET];
+	unsigned freqset[CHAR_SET];
+	char word;
+	unsigned cWord;
+	unsigned freq;
+	unsigned i;
+	unsigned size = 0;
+	printf("\nHow Many Words ? "); 
+	scanf("%d", &cWord); 
+	fflush(stdin);
+	for(i = 0; i < cWord; i++) {
+		printf("Enter Word\t: "); 
+		scanf("%c", &charset[i]); fflush(stdin);
+		printf("Enter Frequency\t: "); 
+		scanf("%d", &freqset[i]); fflush(stdin);
+		printf("\n");
+	}
+	size = strlen(charset);
+	addressCollection collection = createCollection(size);
+	for(i = 0; i < size; i++)
+		collection->arr[i] = newNode(charset[i], freqset[i]);
+	collection->size = size;
+	sortCollection(collection);
+	strcpy(saved.charsaved, charset);
+	for(i=0; i < strlen(saved.charsaved); i++) {
+		saved.freqsaved[i] = freqset[i];
+	}	
+	return collection;
+}
